@@ -3,10 +3,14 @@ from sqlalchemy import text
 
 from app.core.database import engine
 
+from app.routers.projects import router as projects_router
+
 app = FastAPI(
     title="Autonomous ML Agent",
     version="0.1.0",
 )
+
+app.include_router(projects_router)
 
 
 @app.get("/")
