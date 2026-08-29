@@ -1,0 +1,82 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: ml-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mlagent
+      POSTGRES_PASSWORD: mlagent
+      POSTGRES_DB: mlagent
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: ml-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    container_name: ml-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: ml-mlflow
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - minio
+    environment:
+      MLFLOW_TRACKING_URI: http://0.0.0.0:5000
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri postgresql://mlagent:mlagent@postgres:5432/mlagent
+      --default-artifact-root s3://mlflow/
+    ports:
+      - "5000:5000"
+
+  backend:
+    build:
+      context: ./backend
+    container_name: ml-backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+      - mlflow
+      - minio
+    environment:
+      DATABASE_URL: postgresql+psycopg://mlagent:mlagent@postgres:5432/mlagent
+      REDIS_URL: redis://redis:6379/0
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+volumes:
+  postgres_data:
+  minio_data:
