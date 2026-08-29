@@ -27,7 +27,7 @@ build/
 # ML artifacts
 data/
 artifacts/
-models/
+
 
 # OS
 .DS_Store
