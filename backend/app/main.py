@@ -4,6 +4,7 @@ from sqlalchemy import text
 from app.core.database import engine
 
 from app.routers.projects import router as projects_router
+from app.routers.datasets import router as datasets_router
 
 app = FastAPI(
     title="Autonomous ML Agent",
@@ -11,6 +12,7 @@ app = FastAPI(
 )
 
 app.include_router(projects_router)
+app.include_router(datasets_router)
 
 
 @app.get("/")
