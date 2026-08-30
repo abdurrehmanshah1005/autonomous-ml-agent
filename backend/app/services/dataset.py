@@ -1,5 +1,6 @@
 
 import uuid
+from io import BytesIO
 from uuid import UUID
 
 import pandas as pd
@@ -19,7 +20,7 @@ def create_dataset(
 ) -> Dataset:
     dataset_id = uuid.uuid4()
 
-    dataframe = pd.read_csv(data)
+    dataframe = pd.read_csv(BytesIO(data))
 
     storage_uri = storage.upload_file(
         bucket_name=DATASET_BUCKET,
