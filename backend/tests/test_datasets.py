@@ -131,3 +131,58 @@ def test_upload_empty_dataset():
     assert response.status_code == 400
     assert response.json()["detail"] == "Uploaded file is empty"
 
+def test_get_dataset_profile():
+    project_id = create_test_project()
+
+    csv_content = """sepal_length,sepal_width,petal_length,petal_width,species
+5.1,3.5,1.4,0.2,setosa
+4.9,3.0,1.4,0.2,setosa
+6.2,3.4,5.4,2.3,virginica
+6.0,3.0,4.8,1.8,virginica
+"""
+
+    upload_response = client.post(
+        f"/projects/{project_id}/datasets",
+        files={
+            "file": (
+                "profile_test.csv",
+                io.BytesIO(csv_content.encode()),
+                "text/csv",
+            )
+        },
+    )
+
+    assert upload_response.status_code == 201
+
+    dataset_id = upload_response.json()["id"]
+
+    profile_response = client.get(
+        f"/projects/{project_id}/datasets/{dataset_id}/profile"
+    )
+
+    assert profile_response.status_code == 200
+
+    data = profile_response.json()
+
+    assert data["dataset_id"] == dataset_id
+    assert len(data["columns_info"]) == 5
+
+    assert data["columns_info"][0]["name"] == "sepal_length"
+    assert data["columns_info"][0]["dtype"] == "float64"
+    assert data["columns_info"][0]["missing"] == 0
+
+    assert data["columns_info"][4]["name"] == "species"
+    assert data["columns_info"][4]["dtype"] == "str"
+
+
+def test_get_dataset_profile_not_found():
+    project_id = uuid.uuid4()
+    dataset_id = uuid.uuid4()
+
+    response = client.get(
+        f"/projects/{project_id}/datasets/{dataset_id}/profile"
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Dataset not found"
+
