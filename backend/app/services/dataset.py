@@ -6,7 +6,7 @@ import pandas as pd
 
 from app.models.dataset import Dataset
 from app.models.dataset_profile import DatasetProfile
-from app.services.profiler import profile_csv
+from app.services.profiler import profile_dataframe
 from app.services.storage import storage
 from app.services.task_detector import detect_task
 
@@ -23,9 +23,9 @@ def create_dataset(
 
     dataset_id = uuid.uuid4()
 
-    profile = profile_csv(data)
-
     dataframe = pd.read_csv(BytesIO(data))
+
+    profile = profile_dataframe(dataframe)
     task_info = detect_task(dataframe)
 
     storage_uri = storage.upload_file(

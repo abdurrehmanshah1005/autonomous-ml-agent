@@ -1,12 +1,7 @@
-
-from io import BytesIO
-
 import pandas as pd
 
 
-def profile_csv(data: bytes) -> dict:
-    dataframe = pd.read_csv(BytesIO(data))
-
+def profile_dataframe(dataframe: pd.DataFrame) -> dict:
     columns = []
 
     for column in dataframe.columns:
@@ -26,4 +21,3 @@ def profile_csv(data: bytes) -> dict:
         "columns": len(dataframe.columns),
         "columns_info": columns,
     }
-
