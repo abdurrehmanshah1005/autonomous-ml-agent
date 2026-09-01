@@ -7,6 +7,7 @@ import pandas as pd
 
 from app.models.dataset import Dataset
 from app.services.storage import storage
+from app.services.profiler import profile_csv
 
 
 DATASET_BUCKET = "datasets"
@@ -20,7 +21,7 @@ def create_dataset(
 ) -> Dataset:
     dataset_id = uuid.uuid4()
 
-    dataframe = pd.read_csv(BytesIO(data))
+    profile = profile_csv(data)
 
     storage_uri = storage.upload_file(
         bucket_name=DATASET_BUCKET,
@@ -36,7 +37,7 @@ def create_dataset(
         storage_uri=storage_uri,
         file_type="csv",
         size_bytes=len(data),
-        rows=len(dataframe),
-        columns=len(dataframe.columns),
+        rows=profile["rows"],
+        columns=profile["columns"],
     )
 
