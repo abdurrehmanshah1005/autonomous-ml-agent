@@ -1,10 +1,14 @@
 import uuid
+from io import BytesIO
 from uuid import UUID
+
+import pandas as pd
 
 from app.models.dataset import Dataset
 from app.models.dataset_profile import DatasetProfile
 from app.services.profiler import profile_csv
 from app.services.storage import storage
+from app.services.task_detector import detect_task
 
 
 DATASET_BUCKET = "datasets"
@@ -20,6 +24,9 @@ def create_dataset(
     dataset_id = uuid.uuid4()
 
     profile = profile_csv(data)
+
+    dataframe = pd.read_csv(BytesIO(data))
+    task_info = detect_task(dataframe)
 
     storage_uri = storage.upload_file(
         bucket_name=DATASET_BUCKET,
@@ -37,6 +44,8 @@ def create_dataset(
         size_bytes=len(data),
         rows=profile["rows"],
         columns=profile["columns"],
+        target_column=task_info["target_column"],
+        task_type=task_info["task_type"],
     )
 
     dataset_profile = DatasetProfile(

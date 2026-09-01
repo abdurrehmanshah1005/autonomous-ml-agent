@@ -63,6 +63,8 @@ def test_upload_dataset():
     assert data["columns"] == 5
     assert data["size_bytes"] > 0
     assert data["storage_uri"].startswith("s3://datasets/")
+    assert data["target_column"] == "species"
+    assert data["task_type"] == "classification"
 
     dataset_id = uuid.UUID(data["id"])
 
