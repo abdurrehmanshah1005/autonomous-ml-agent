@@ -20,3 +20,11 @@ class DatasetResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class DatasetProfileResponse(BaseModel):
+    id: UUID
+    dataset_id: UUID
+    columns_info: list[dict]
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+

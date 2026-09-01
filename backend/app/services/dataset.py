@@ -1,13 +1,10 @@
-
 import uuid
-from io import BytesIO
 from uuid import UUID
 
-import pandas as pd
-
 from app.models.dataset import Dataset
-from app.services.storage import storage
+from app.models.dataset_profile import DatasetProfile
 from app.services.profiler import profile_csv
+from app.services.storage import storage
 
 
 DATASET_BUCKET = "datasets"
@@ -18,7 +15,8 @@ def create_dataset(
     filename: str,
     data: bytes,
     content_type: str,
-) -> Dataset:
+) -> tuple[Dataset, DatasetProfile]:
+
     dataset_id = uuid.uuid4()
 
     profile = profile_csv(data)
@@ -30,7 +28,7 @@ def create_dataset(
         content_type=content_type,
     )
 
-    return Dataset(
+    dataset = Dataset(
         id=dataset_id,
         project_id=project_id,
         name=filename,
@@ -41,3 +39,9 @@ def create_dataset(
         columns=profile["columns"],
     )
 
+    dataset_profile = DatasetProfile(
+        dataset_id=dataset_id,
+        columns_info=profile["columns_info"],
+    )
+
+    return dataset, dataset_profile

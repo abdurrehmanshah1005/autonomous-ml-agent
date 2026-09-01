@@ -1,4 +1,3 @@
-
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -6,10 +5,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models.dataset import Dataset
 from app.models.project import Project
-from app.schemas.dataset import DatasetResponse
+from app.schemas.dataset import DatasetProfileResponse, DatasetResponse
 from app.services.dataset import create_dataset
+from app.models.dataset import Dataset
+from app.models.dataset_profile import DatasetProfile
 
 
 router = APIRouter(
@@ -52,7 +52,7 @@ async def upload_dataset(
             detail="Uploaded file is empty",
         )
 
-    dataset = create_dataset(
+    dataset, dataset_profile = create_dataset(
         project_id=project_id,
         filename=file.filename,
         data=data,
@@ -60,8 +60,45 @@ async def upload_dataset(
     )
 
     db.add(dataset)
+    db.add(dataset_profile)
+
     db.commit()
     db.refresh(dataset)
 
     return dataset
 
+@router.get(
+    "/{dataset_id}/profile",
+    response_model=DatasetProfileResponse,
+)
+def get_dataset_profile(
+    project_id: UUID,
+    dataset_id: UUID,
+    db: Session = Depends(get_db),
+):
+    dataset = db.execute(
+        select(Dataset).where(
+            Dataset.id == dataset_id,
+            Dataset.project_id == project_id,
+        )
+    ).scalar_one_or_none()
+
+    if dataset is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset not found",
+        )
+
+    profile = db.execute(
+        select(DatasetProfile).where(
+            DatasetProfile.dataset_id == dataset_id
+        )
+    ).scalar_one_or_none()
+
+    if profile is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset profile not found",
+        )
+
+    return profile
