@@ -5,6 +5,7 @@ from app.services.profiler import profile_dataframe
 from app.services.quality import analyze_quality
 from app.services.task_detector import detect_task
 from app.services.ydata_profiler import generate_profile
+from app.services.gx_validator import validate_dataframe
 
 
 def analyze_dataset(
@@ -30,17 +31,20 @@ def analyze_dataset(
     # Generate the richer YData Profiling report.
     ydata_profile = generate_profile(pandas_dataframe)
 
+    gx_validation = validate_dataframe(pandas_dataframe)
+
     return {
-        "dataset": {
-            "rows": profile["rows"],
-            "columns": profile["columns"],
-            "duplicate_rows": profile["duplicate_rows"],
-        },
-        "columns": {
-            "info": profile["columns_info"],
-            "types": profile["column_types"],
-        },
-        "quality": quality,
-        "task": task,
-        "ydata_profile": ydata_profile,
-    }
+    "dataset": {
+        "rows": profile["rows"],
+        "columns": profile["columns"],
+        "duplicate_rows": profile["duplicate_rows"],
+    },
+    "columns": {
+        "info": profile["columns_info"],
+        "types": profile["column_types"],
+    },
+    "quality": quality,
+    "task": task,
+    "ydata_profile": ydata_profile,
+    "validation": gx_validation,
+}

@@ -27,3 +27,7 @@ def test_analyze_dataset():
     assert len(result["columns"]["info"]) == 4
     assert "age" in result["columns"]["types"]["numeric"]
     assert "city" in result["columns"]["types"]["categorical"]
+
+    assert "validation" in result
+    assert result["validation"]["success"] is True
+    assert len(result["validation"]["expectations"]) == 4

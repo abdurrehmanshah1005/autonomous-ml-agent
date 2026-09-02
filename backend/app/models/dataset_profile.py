@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, JSON, func
+from sqlalchemy import DateTime, ForeignKey, JSON, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -24,13 +24,11 @@ class DatasetProfile(Base):
         unique=True,
     )
 
-    columns_info: Mapped[list] = mapped_column(
-        JSON,
-        nullable=False,
-    )
+    columns_info: Mapped[list] = mapped_column(JSON, nullable=False)
+    quality_info: Mapped[dict] = mapped_column(JSON, nullable=False)
 
-    quality_info: Mapped[dict] = mapped_column(
-        JSON,
+    ydata_profile_uri: Mapped[str] = mapped_column(
+        String(1000),
         nullable=False,
     )
 

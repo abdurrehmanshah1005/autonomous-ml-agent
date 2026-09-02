@@ -25,6 +25,7 @@ class DatasetProfileResponse(BaseModel):
     dataset_id: UUID
     columns_info: list
     quality_info: dict
+    ydata_profile_uri: str
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
