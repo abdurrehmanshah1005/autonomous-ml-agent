@@ -11,7 +11,10 @@ def profile_dataframe(dataframe: pd.DataFrame) -> dict:
     for column in dataframe.columns:
         series = dataframe[column]
 
-        dtype = str(series.dtype)
+        if pd.api.types.is_object_dtype(series):
+            dtype = "str"
+        else:
+            dtype = str(series.dtype)
         missing = int(series.isna().sum())
         unique = int(series.nunique(dropna=True))
 
