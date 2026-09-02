@@ -9,6 +9,7 @@ from app.models.dataset_profile import DatasetProfile
 from app.services.profiler import profile_dataframe
 from app.services.storage import storage
 from app.services.task_detector import detect_task
+from app.services.quality import analyze_quality
 
 
 DATASET_BUCKET = "datasets"
@@ -27,6 +28,7 @@ def create_dataset(
 
     profile = profile_dataframe(dataframe)
     task_info = detect_task(dataframe)
+    quality_info = analyze_quality(dataframe)
 
     storage_uri = storage.upload_file(
         bucket_name=DATASET_BUCKET,
@@ -51,6 +53,7 @@ def create_dataset(
     dataset_profile = DatasetProfile(
         dataset_id=dataset_id,
         columns_info=profile["columns_info"],
+        quality_info=quality_info,
     )
 
     return dataset, dataset_profile

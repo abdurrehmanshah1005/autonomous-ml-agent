@@ -29,6 +29,11 @@ class DatasetProfile(Base):
         nullable=False,
     )
 
+    quality_info: Mapped[dict] = mapped_column(
+        JSON,
+        nullable=False,
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

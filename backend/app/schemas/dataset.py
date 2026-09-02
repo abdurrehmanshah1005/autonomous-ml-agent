@@ -23,7 +23,8 @@ class DatasetResponse(BaseModel):
 class DatasetProfileResponse(BaseModel):
     id: UUID
     dataset_id: UUID
-    columns_info: list[dict]
+    columns_info: list
+    quality_info: dict
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
