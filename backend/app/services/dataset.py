@@ -1,11 +1,9 @@
 import uuid
-from io import BytesIO
 from uuid import UUID
-
-import pandas as pd
 
 from app.models.dataset import Dataset
 from app.models.dataset_profile import DatasetProfile
+from app.services.data_engine import read_csv, to_pandas
 from app.services.profiler import profile_dataframe
 from app.services.storage import storage
 from app.services.task_detector import detect_task
@@ -24,11 +22,15 @@ def create_dataset(
 
     dataset_id = uuid.uuid4()
 
-    dataframe = pd.read_csv(BytesIO(data))
+    # Primary data-processing layer
+    dataframe = read_csv(data)
 
-    profile = profile_dataframe(dataframe)
-    task_info = detect_task(dataframe)
-    quality_info = analyze_quality(dataframe)
+    # Existing intelligence services currently use Pandas.
+    pandas_dataframe = to_pandas(dataframe)
+
+    profile = profile_dataframe(pandas_dataframe)
+    task_info = detect_task(pandas_dataframe)
+    quality_info = analyze_quality(pandas_dataframe)
 
     storage_uri = storage.upload_file(
         bucket_name=DATASET_BUCKET,
